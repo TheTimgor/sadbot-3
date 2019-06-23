@@ -1,14 +1,19 @@
 from discord.ext import commands
-import discord
 import asyncio
 import json
 import Chat
-import traceback
+import sys
+import pickle
 
 startup = True
 
 with open('config.json') as f:
     config = json.load(f)
+
+if len(sys.argv) > 1:
+    config['token'] = sys.argv[1]
+if len(sys.argv) > 2:
+    config['prefix'] = sys.argv[2]
 
 bot = commands.Bot(command_prefix=config['prefix'], self_bot=False)
 

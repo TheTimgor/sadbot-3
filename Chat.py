@@ -165,12 +165,18 @@ def fix_vp(np, vp):
     return vp
 
 
-def how_answer(s):
+def uninvert(s):
     np, vp = find_question_root(s)
     np = fix_np(np)
     vp = fix_vp(np, vp)
     print(np,vp)
     return detokenizer.detokenize(np)+' '+detokenizer.detokenize(vp)
+
+
+def why_answer(s):
+    np, vp = find_question_root(s)
+    np = fix_np(np)
+    return 'because '+detokenizer.detokenize(np)
 
 
 def build_model(h):
@@ -277,6 +283,16 @@ class Model:
         return detokenizer.detokenize(sent[2:-1])
 
 
+def generate_relevant_sentence(vector_in, s):
+    sentences = {}
+    for i in range(0, 200):
+        sentence = model.make_sentence(s)
+        v_sentence = word_vectorize(sentence)
+        sentences[sentence] = cosine_dic(vector_in, v_sentence)
+    closest_out = nlargest(20, sentences, key=sentences.get)
+    return choice(closest_out)
+
+
 def get_response(m):
     vector_m = word_vectorize(m)
     t = parser.parse_one(word_tokenize(m))
@@ -285,24 +301,22 @@ def get_response(m):
         return choice(['yes', 'yup', 'uh-huh', 'no', 'nope', 'naw'])
     if q_typ == 'wh-question':
         wh_phrase = traverse_for(t, ['WHADJP', 'WHAVP', 'WHNP', 'WHPP', 'WHADVP'])
-        if 'who' in [w.lower() for w in wh_phrase]:
+        wh_phrase = [w.lower() for w in wh_phrase]
+        if 'who' in wh_phrase or 'whose' in wh_phrase or 'who\'s' in wh_phrase or 'whom' in wh_phrase:
             people = [w[0] for w in named_entities if w[1] == 'PERSON']
             return choice(people)
-        if 'where' in [w.lower() for w in wh_phrase]:
+        if 'where' in wh_phrase:
             places = [w[0] for w in named_entities if w[1] == 'LOCATION']
             return choice(places)
-        if 'when' in [w.lower() for w in wh_phrase]:
+        if 'when' in wh_phrase:
             times = [w[0] for w in named_entities if w[1] == 'DATE' or w[1] == 'TIME']
             return choice(times)
-        if 'how' in [w.lower() for w in wh_phrase]:
-            sentences = {}
-            seeder = how_answer(m)
-            for i in range(0, 200):
-                sentence = model.make_sentence(seeder)
-                v_sentence = word_vectorize(sentence)
-                sentences[sentence] = cosine_dic(vector_m, v_sentence)
-            closest_out = nlargest(20, sentences, key=sentences.get)
-            return choice(closest_out)
+        if 'why' in wh_phrase:
+            seeder = why_answer(m)
+            return generate_relevant_sentence(vector_m, seeder)
+        if 'how' in wh_phrase or 'what' in wh_phrase:
+            seeder = uninvert(m)
+            return generate_relevant_sentence(vector_m, seeder)
     g_typ = classify_greeting(m)
     print(g_typ)
     if g_typ == 'Greet':
@@ -341,5 +355,5 @@ def get_response(m):
 
 
 if __name__ == '__main__':
-    print(find_question_root('How is tim?'))
-    print(how_answer('How is tim?'))
+    print(find_question_root('What is the time??'))
+    print(uninvert('What is the time?'))
