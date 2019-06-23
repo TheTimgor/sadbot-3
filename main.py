@@ -14,7 +14,8 @@ bot = commands.Bot(command_prefix=config['prefix'], self_bot=False)
 
 
 # gets chat history
-async def get_hist(chan, lim):
+async def get_hist(c=config['train_channel'], lim=config['history_backlog']):
+    chan = bot.get_channel(c)
     history = []
     hist_itr = chan.history(limit=lim)
     async for m in hist_itr:
@@ -28,7 +29,10 @@ async def chat(ctx, *, message):
     async with ctx.channel.typing():
         print('getting response')
         response = Chat.get_response(message)
-    await ctx.send(response)
+    if response:
+        await ctx.send(response)
+    else:
+        await ctx.send('i deadass don\'t know how to respond to that')
 
 # tell you when the bot is ready
 @bot.event
@@ -37,6 +41,7 @@ async def on_ready():
     if startup:
         startup = False
         print('Logged in')
+        Chat.build_model(await get_hist())
 
 
 # main function to start the bot
