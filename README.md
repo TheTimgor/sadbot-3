@@ -1,5 +1,7 @@
-#Installation instructions
+# Installation instructions
+
 *Instructions should work on all operating systems*
+
 1. Install required packages with `pip install -r requirements.txt`
 2. This program requires some of the Stanford NLP Group's wonderful tools. As per licensing issues and for the sake of file size, they could not be bundled with the program. You will need to download them.
     * [Stanford Parser core](https://nlp.stanford.edu/software/stanford-parser-full-2018-10-17.zip)
