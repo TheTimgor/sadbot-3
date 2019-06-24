@@ -1,27 +1,35 @@
 import json
 import os
 import pickle
-import numpy
+from collections import Counter
+from heapq import nlargest
+from random import choice, sample
+
 import math
 import nltk
+import numpy
 from nltk import NaiveBayesClassifier
 from nltk import word_tokenize
 from nltk.parse import stanford
 from nltk.tag import StanfordNERTagger
-from nltk.corpus import nps_chat
-from sacremoses import MosesDetokenizer
-from heapq import nlargest
-from collections import Counter
-from random import choice, sample
 # fuck pycharm
 # noinspection PyUnresolvedReferences
 from pattern.en import conjugate, tenses
+from sacremoses import MosesDetokenizer
+
+nltk.download('nps_chat')
+from nltk.corpus import nps_chat
+
 
 cwd = os.getcwd()
 os.environ['CLASSPATH'] = os.getcwd() + '/nlp/stanford-parser-full-2018-10-17'
 
-with open('config.json') as f:
-    config = json.load(f)
+try:
+    with open('config.json') as f:
+        config = json.load(f)
+except FileNotFoundError:
+    pass
+
 
 history = []
 vocab = {}
@@ -59,7 +67,7 @@ def generate_greeting_classifier(s):
     train, test = s[100:], s[:100]
     global greeting_classifier
     greeting_classifier = NaiveBayesClassifier.train(train)
-    print(nltk.classify.accuracy(greeting_classifier, test))
+    # print(nltk.classify.accuracy(greeting_classifier, test))
 
 
 def generate_greeting_classifier_nps():
@@ -169,7 +177,7 @@ def uninvert(s):
     np, vp = find_question_root(s)
     np = fix_np(np)
     vp = fix_vp(np, vp)
-    print(np,vp)
+    # print(np,vp)
     return detokenizer.detokenize(np)+' '+detokenizer.detokenize(vp)
 
 
@@ -205,7 +213,7 @@ def build_model(h):
                     named_entities[-1] = (named_entities[-1][0] + ' ' + n_e[i][0], n_e[i][1])
                 else:
                     named_entities.append(n_e[i])
-        print(named_entities)
+        # print(named_entities)
         with open('named.pickle', 'wb') as f:
             pickle.dump(named_entities, f)
     generate_greeting_classifier_nps()
@@ -318,7 +326,7 @@ def get_response(m):
             seeder = uninvert(m)
             return generate_relevant_sentence(vector_m, seeder)
     g_typ = classify_greeting(m)
-    print(g_typ)
+    # print(g_typ)
     if g_typ == 'Greet':
         poss_hellos = {}
         for s in hellos:
@@ -352,8 +360,3 @@ def get_response(m):
             sentences[sentence] = cosine_dic(vector_m, v_sentence)
     closest_out = nlargest(5, sentences, key=sentences.get)
     return choice(closest_out)
-
-
-if __name__ == '__main__':
-    print(find_question_root('What is the time??'))
-    print(uninvert('What is the time?'))

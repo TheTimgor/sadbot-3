@@ -1,19 +1,25 @@
-from discord.ext import commands
 import asyncio
 import json
-import Chat
 import sys
-import pickle
+from discord.ext import commands
+import Chat
 
 startup = True
 
-with open('config.json') as f:
-    config = json.load(f)
+try:
+    with open('config.json') as f:
+        config = json.load(f)
+except FileNotFoundError:
+    print('CONFIG FILE NOT FOUND! using argv fallback.')
 
 if len(sys.argv) > 1:
     config['token'] = sys.argv[1]
 if len(sys.argv) > 2:
     config['prefix'] = sys.argv[2]
+if len(sys.argv) > 3:
+    config['history_backlog'] = sys.argv[3]
+if len(sys.argv) > 4:
+    config['train_channel'] = sys.argv[3]
 
 bot = commands.Bot(command_prefix=config['prefix'], self_bot=False)
 
@@ -25,7 +31,7 @@ async def get_hist(c=config['train_channel'], lim=config['history_backlog']):
     hist_itr = chan.history(limit=lim)
     async for m in hist_itr:
         history.insert(0, m.content)
-        print(m.content)
+        # print(m.content)
     return history
 
 # get response
