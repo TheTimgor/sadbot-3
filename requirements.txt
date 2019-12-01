@@ -21,7 +21,7 @@ lxml==4.3.4
 more-itertools==7.0.0
 multidict==4.5.2
 mysqlclient==1.4.2.post1
-nltk==3.4.3
+nltk==3.4.5
 numpy==1.16.4
 Pattern==3.6
 pdfminer.six==20181108
