@@ -17,7 +17,7 @@ idna==2.8
 idna-ssl==1.1.0
 jaraco.functools==2.0
 joblib==0.13.2
-lxml==4.3.4
+lxml==4.9.1
 more-itertools==7.0.0
 multidict==4.5.2
 mysqlclient==1.4.2.post1
