@@ -26,7 +26,7 @@ numpy==1.16.4
 Pattern==3.6
 pdfminer.six==20181108
 portend==2.5
-protobuf==3.8.0
+protobuf==3.18.3
 pycryptodome==3.8.2
 python-docx==0.8.10
 pytz==2019.1
